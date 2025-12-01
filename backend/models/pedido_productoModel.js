@@ -19,6 +19,7 @@ const Pedido_Producto = sequelize.define("pedido_producto",{
         allowNull:false
     }
 },{
+    tableName: "pedido_producto",
     timestamps:false
 })
 

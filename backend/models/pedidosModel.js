@@ -21,6 +21,7 @@ const Pedido = sequelize.define("pedido",{
         allowNull:false
     }
 },{
+    tableName: "pedido",
     timestamps: true,
 }) 
 

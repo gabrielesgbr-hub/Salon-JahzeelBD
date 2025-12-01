@@ -32,7 +32,7 @@ const Producto = sequelize.define("producto",{
         type: DataTypes.DECIMAL(10,2),
         allowNull: false,
     },
-    estaActivo:{
+    estaactivo:{
         type: DataTypes.BOOLEAN,
         defaultValue:false
     },
@@ -42,6 +42,7 @@ const Producto = sequelize.define("producto",{
         defaultValue: 0
     }
 },{
+    tableName: "producto",
     timestamps:true,
 })
 

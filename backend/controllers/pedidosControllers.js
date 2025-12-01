@@ -1,26 +1,26 @@
 const asyncHandler = require('express-async-handler')
 const Producto = require('../models/productosModel')
 const Pedido = require('../models/pedidosModel')
-const mongoose = require('mongoose')
+const Pedido_Producto = require('../models/pedido_productoModel')
 
 const getPedidos = asyncHandler(async(req,res)=>{
     if(!req.usuario.esAdmin){
-        const pedidos = await Pedido.find({usuario:req.usuario.id})
+        const pedidos = await Pedido.findAll({where:{usuario:req.usuario.id}})
         res.status(200).json(pedidos)
     }
-    const pedidos = await Pedido.find()
+    const pedidos = await Pedido.findAll()
     res.status(200).json(pedidos)
 })
 
 const getPedido = asyncHandler(async(req,res)=>{
-    const pedido = await Pedido.findById(req.params.id)
+    const pedido = await Pedido.findByPk(req.params.id)
 
     if(!pedido){
         res.status(404)
         throw new Error('Pedido no encontrado')
     }
 
-    if(pedido.usuario.toString() !== req.usuario.id && !req.usuario.esAdmin){
+    if(pedido.usuario !== req.usuario.id && !req.usuario.esAdmin){
         res.status(401)
         throw new Error('Acceso no autorizado')
     }
@@ -31,90 +31,80 @@ const getPedido = asyncHandler(async(req,res)=>{
 const createPedidos = asyncHandler(async(req,res)=>{
     const {productos} = req.body
 
-    if(!productos){
+    if(!productos || !Array.isArray(productos) || productos.length === 0){
         res.status(400)
-        throw new Error('Faltan datos para completar el pedido')
+        throw new Error('El pedido no puede estar vacío')
     }
 
-    const session = await mongoose.startSession()
-    session.startTransaction()
+    const t = await Producto.sequelize.transaction()
 
     try{
-        let pedido = await Pedido.create([{
+        const pedido = await Pedido.create({
             usuario:req.usuario.id,
-            productos,
-            total:0
-        }], {session})
+            total:0,
+        }, {transaction:t},)
 
-        pedido = pedido[0]
+        let total = 0
 
-        pedido = await pedido.populate({
-            path:"productos.producto",
-            options: {session}
-        })
+        for (const item of productos){
+            const producto = await Producto.findByPk(item.id_producto, {transaction:t},)
 
-        for (const item of pedido.productos) {
-            if (!item.producto) { 
-                throw new Error(`Producto con ID ${item} no existe`)
+            if(!producto || !producto.estaactivo){
+                res.status(400)
+                throw new Error('El producto solicitado no está disponible')
             }
+
+            await producto.increment({ stock: -item.cantidad},{transaction:t},)
+
+            await Pedido_Producto.create({
+                id_pedido: pedido.id_pedido,
+                id_producto:item.id_producto,
+                cantidad:item.cantidad
+            }, {transaction:t},)
+
+            total += Number(producto.precio)*item.cantidad
         }
-
-        for (const item of pedido.productos) {
-            if (!item.producto.estaActivo) {
-                throw new Error(`El producto '${item.producto.nombre}' no está activo`)
-            }
-        }
-
-        const result = await Producto.bulkWrite(
-            pedido.productos.map(item => ({
-                updateOne: {
-                filter: { _id: item.producto._id, stock: { $gte: item.cantidad } },
-                update: { $inc: { stock: -item.cantidad } }
-                }
-            })), {session}
-        )
-
-        if (result.modifiedCount !== pedido.productos.length) {
-            for (const item of pedido.productos) {
-                const producto = await Producto.findById(item.producto._id).session(session)
-
-                if (!producto || producto.stock < item.cantidad) {
-                    throw new Error(`Stock insuficiente para '${producto?.nombre}' (ID: ${item.producto._id})`)
-                }
-            }
-        }
-        
-        const total = pedido.productos.reduce((acum, item)=>{
-            return acum + item.producto.precio*item.cantidad
-        }, 0)
 
         pedido.total = total
-        await pedido.save({session})
+        await pedido.save({transaction: t})
 
-        res.status(201).json({
-            _id: pedido._id,
-            usuario: pedido.usuario,
-            productos: pedido.productos.map(item => ({
-            nombre: item.producto.nombre,
-            cantidad: item.cantidad,
-            categoria: item.producto.categoria,
-            precio: item.producto.precio
-            })),
-            total:pedido.total,
-            estado:pedido.estado
+        const pedidoCompleto = await Pedido.findByPk(pedido.id_pedido, {
+            transaction:t,
+            include: [
+                {
+                    model: Producto,
+                    attributes: ['id_producto'],
+                    through: {
+                        attributes: ['cantidad']
+                    }
+                }
+            ]
         })
 
-        await session.commitTransaction()
-        session.endSession()
+        const productosLimpios = pedidoCompleto.productos.map(p => ({
+            id_producto: p.id_producto,
+            cantidad: p.pedido_producto.cantidad
+        }))
+
+        await t.commit()
+
+        res.status(201).json({
+            id_pedido: pedidoCompleto.id_pedido,
+            usuario: pedidoCompleto.usuario,
+            total: pedidoCompleto.total,
+            estado: pedidoCompleto.estado,
+            productos: productosLimpios,
+            createdAt: pedidoCompleto.createdAt,
+            updatedAt: pedidoCompleto.updatedAt
+        })
     } catch (error){
-        await session.abortTransaction()
-        session.endSession()
+        await t.rollback()
         throw error
     }
 })
 
 const deletePedidos = asyncHandler(async(req,res)=>{
-    const pedido = await Pedido.findById(req.params.id)
+    const pedido = await Pedido.findByPk(req.params.id)
 
     if(!pedido){
         res.status(404)
@@ -126,19 +116,19 @@ const deletePedidos = asyncHandler(async(req,res)=>{
         throw new Error('Acceso no autorizado')
     }
 
-    await pedido.deleteOne()
+    await pedido.destroy()
     res.status(200).json({id: req.params.id})
 })
 
 const cancelarPedidos = asyncHandler(async(req,res)=>{
-    const pedido = await Pedido.findById(req.params.id)
+    const pedido = await Pedido.findByPk(req.params.id)
 
     if(!pedido){
         res.status(404)
         throw new Error('Pedido no encontrado')
     }
 
-    if(pedido.usuario.toString() !== req.usuario.id && !req.usuario.esAdmin){
+    if(pedido.usuario !== req.usuario.id && !req.usuario.esAdmin){
         res.status(401)
         throw new Error('Acceso no autorizado')
     }
@@ -153,34 +143,33 @@ const cancelarPedidos = asyncHandler(async(req,res)=>{
         throw new Error('Este pedido ya fue completado')
     }
 
-    const session = await mongoose.startSession()
-    session.startTransaction()
+    const t = await Producto.sequelize.transaction()
 
     try{
-        await Producto.bulkWrite(
-            pedido.productos.map(item => ({
-                updateOne: {
-                filter: { _id: item.producto},
-                update: { $inc: { stock: item.cantidad } }
-                }
-            })), {session}
-        )
+        const productos = await Pedido_Producto.findAll({
+            where:{id_pedido:pedido.id_pedido},
+            transaction: t
+        })
 
-        const pedidoCancelado = await Pedido.findByIdAndUpdate(req.params.id, {estado:'cancelado'}, {new:true, runValidators:true, session})
+        for (const item of productos){
+            const producto = await Producto.findByPk(item.id_producto, {transaction:t})
+
+            await producto.increment({stock:item.cantidad}, {transaction:t},)
+        }
+
+        const pedidoCancelado = await pedido.update({estado:'cancelado'}, {transaction:t})
+
+        await t.commit()
 
         res.status(200).json(pedidoCancelado)
-
-        await session.commitTransaction()
-        session.endSession()
     } catch (error){
-        await session.abortTransaction()
-        session.endSession()
+        await t.rollback()
         throw error
     }
 })
 
 const completarPedidos = asyncHandler(async(req,res)=>{
-    const pedido = await Pedido.findById(req.params.id)
+    const pedido = await Pedido.findByPk(req.params.id)
 
     if(!pedido){
         res.status(404)
@@ -202,7 +191,7 @@ const completarPedidos = asyncHandler(async(req,res)=>{
         throw new Error('Acceso no autorizado')
     }
 
-    const pedidoCompletado = await Pedido.findByIdAndUpdate(req.params.id, {estado:'completado'}, {new:true, runValidators:true})
+    const pedidoCompletado = await pedido.update({estado:'completado'})
     res.status(200).json(pedidoCompletado)
 })
 
