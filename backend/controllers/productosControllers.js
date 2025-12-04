@@ -13,7 +13,9 @@ const getProductosAdmin = asyncHandler(async(req, res)=>{
         throw new Error('Acceso no autorizado')
     }
 
-    const productos = await Producto.findAll()
+    const productos = await Producto.findAll({
+        order: [['id_producto', 'ASC']]
+    })
     res.status(200).json(productos)
 })
 

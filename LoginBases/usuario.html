@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salón Jahzeel – Usuario</title>
+  <link rel="stylesheet" href="css/usuario.css">
+  <link rel="stylesheet" href="css/personalizado.css">
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+  <header class="user-headerbar">
+    <div class="headerbar-logo">
+      <ion-icon name="cut-outline"></ion-icon>
+      <span>Salón Jahzeel</span>
+    </div>
+    <a href="login.html" class="logout-btn" id="cerrarSesionBtn">
+      <ion-icon name="log-out-outline"></ion-icon> Cerrar sesión
+    </a>
+  </header>
+  <main class="user-main">
+    <div class="main-title" id="bienvenida-usuario">Bienvenid@</div>
+    <div class="main-subtitle">Agenda una cita, compra productos, consulta tus citas, tus pedidos y deja tu opinión</div>
+    <div class="user-panel-grid">
+      <!-- Agenda cita -->
+      <div class="user-card-panel agendar-panel">
+        <h3>Agenda tu cita</h3>
+        <form id="formAgendarCita">
+          <div class="container-input">
+            <ion-icon name="person-outline"></ion-icon>
+            <select id="selectEstilista" required></select>
+          </div>
+          <div class="container-input">
+            <ion-icon name="construct-outline"></ion-icon>
+            <select id="selectServicio" required>
+              <option value="" disabled selected>Selecciona un servicio</option>
+              <option value="corte">Corte de pelo</option>
+              <option value="tinte">Tinte</option>
+              <option value="peinado">Peinado</option>
+              <option value="manicure">Manicure</option>
+              <option value="cejas">Cejas</option>
+            </select>
+          </div>
+          <div class="container-input">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <input type="date" id="fechaCita" required>
+          </div>
+          <div class="container-input">
+            <ion-icon name="time-outline"></ion-icon>
+            <input type="time" id="horaCita" required>
+          </div>
+          <div class="container-input">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <input type="text" id="notasCita" placeholder="Notas (opcional)">
+          </div>
+          <button class="button" type="submit">Agendar cita</button>
+        </form>
+        <div id="msgCita"></div>
+      </div>
+      <!-- Consulta citas agendadas -->
+      <div class="user-card-panel citas-panel">
+        <h3>Mis citas agendadas</h3>
+        <div id="listaCitas"></div>
+      </div>
+      <!-- Compra productos -->
+      <div class="user-card-panel productos-panel">
+        <h3>Compra productos</h3>
+        <form id="formCompraProductos">
+          <div id="listaProductos"></div>
+          <button class="button" type="submit">Realizar pedido</button>
+          <div id="msgPedido"></div>
+        </form>
+      </div>
+      <!-- Pedidos usuario -->
+      <div class="user-card-panel pedidos-panel">
+        <h3>Mis pedidos</h3>
+        <div id="listaPedidos"></div>
+      </div>
+      <!-- Reseñas -->
+      <div class="user-card-panel reseñas-panel">
+        <form id="formReseña">
+          <h2>Reseñas</h2>
+          <span class="reseña-descripcion">Tu opinión es importante. ¡Compártela!</span>
+          <div class="container-input">
+            <ion-icon name="star-outline"></ion-icon>
+            <select id="puntajeReseña" required>
+              <option value="" disabled selected>Calificación</option>
+              <option value="1">⭐ 1 estrella</option>
+              <option value="2">⭐⭐ 2 estrellas</option>
+              <option value="3">⭐⭐⭐ 3 estrellas</option>
+              <option value="4">⭐⭐⭐⭐ 4 estrellas</option>
+              <option value="5">⭐⭐⭐⭐⭐ 5 estrellas</option>
+            </select>
+          </div>
+          <div class="container-input textarea-box">
+            <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+            <textarea id="contenidoReseña" placeholder="Escribe tu reseña..." required></textarea>
+          </div>
+          <button class="button" type="submit">Enviar reseña</button>
+        </form>
+        <div id="msgReseña"></div>
+        <div id="listaReseñas"></div>
+      </div>
+    </div>
+  </main>
+  <script>
+    // -------- LOGIN Y SESIÓN --------
+    async function mostrarBienvenida() {
+      let nombre = localStorage.getItem('nombreUsuario');
+      if (!nombre && localStorage.getItem('token')) {
+        try {
+          const res = await fetch('http://localhost:5000/api/usuarios/data', {
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            nombre = data.nombre;
+            if (nombre) localStorage.setItem('nombreUsuario', nombre);
+            if (data.id) localStorage.setItem('idUsuario', data.id);
+            if (data.esAdmin) localStorage.setItem('esAdmin', data.esAdmin);
+          }
+        } catch {}
+      }
+      document.getElementById('bienvenida-usuario').textContent =
+        nombre ? `Bienvenid@, ${nombre}` : "Bienvenid@";
+    }
+
+    document.getElementById('cerrarSesionBtn').addEventListener('click', function(e) {
+      localStorage.removeItem('nombreUsuario');
+      localStorage.removeItem('token');
+      localStorage.removeItem('idUsuario');
+      localStorage.removeItem('esAdmin');
+    });
+
+    // -------- CITAS --------
+    async function cargarEstilistasSelect() {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/estilista', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const estilistas = await res.json();
+      const select = document.getElementById('selectEstilista');
+      select.innerHTML = '';
+      estilistas.filter(e => e.activo).forEach(e => {
+        select.innerHTML += `<option value="${e._id}">${e.nombre}</option>`;
+      });
+      if (select.innerHTML === '') {
+        select.innerHTML = `<option value="" disabled>No hay estilistas disponibles</option>`;
+      }
+    }
+    async function cargarCitasUsuario() {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/citas', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const citas = await res.json();
+      const lista = document.getElementById('listaCitas');
+      lista.innerHTML = '';
+      if (!citas.length) {
+        lista.innerHTML = '<span>No tienes citas agendadas.</span>';
+        return;
+      }
+      citas.forEach(cita => {
+        let nombreEstilista = cita.estilista && cita.estilista.nombre ? cita.estilista.nombre : 'N/A';
+        lista.innerHTML += `
+          <div class="cita-card" id="cita-${cita._id}">
+            <b>Servicio:</b> ${cita.servicio}<br>
+            <b>Estilista:</b> ${nombreEstilista}<br>
+            <b>Fecha:</b> ${new Date(cita.fecha).toLocaleDateString()}<br>
+            <b>Hora:</b> ${cita.hora}<br>
+            <b>Estado:</b> ${cita.estado}
+            ${cita.notas ? `<br><b>Notas:</b> ${cita.notas}` : ""}
+            <br>
+            <button class="btn-eliminar-cita" onclick="eliminarCita('${cita._id}')">Eliminar</button>
+          </div>
+        `;
+      });
+    }
+    async function eliminarCita(idCita) {
+      if (!confirm('¿Seguro que quieres eliminar esta cita?')) return;
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('http://localhost:5000/api/citas/' + idCita, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+          cargarCitasUsuario();
+          alert('Cita eliminada correctamente.');
+        } else {
+          const err = await res.json();
+          alert(err.message || 'No se pudo eliminar la cita.');
+        }
+      } catch {
+        alert('Error de conexión al eliminar la cita.');
+      }
+    }
+    document.getElementById('formAgendarCita').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const id_estilista = document.getElementById('selectEstilista').value;
+      const servicio = document.getElementById('selectServicio').value;
+      const fecha = document.getElementById('fechaCita').value;
+      const hora = document.getElementById('horaCita').value;
+      const notas = document.getElementById('notasCita').value;
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('http://localhost:5000/api/citas', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ servicio, fecha, hora, id_estilista, notas })
+        });
+        if (res.ok) {
+          cargarCitasUsuario();
+          e.target.reset();
+        } else {
+          const errData = await res.json();
+          alert(errData.message || "No se pudo agendar la cita.");
+        }
+      } catch (err) {
+        alert("Error de conexión al servidor.");
+      }
+    });
+
+    // -------- PRODUCTOS Y PEDIDOS --------
+    let productosActuales = [];
+
+    async function cargarProductosUsuario() {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/productos', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      productosActuales = await res.json();
+      const cont = document.getElementById('listaProductos');
+      cont.innerHTML = "";
+      if (!productosActuales.length) {
+        cont.innerHTML = "<span>No hay productos disponibles.</span>";
+        return;
+      }
+      productosActuales.filter(p => p.estaactivo || p.activo).forEach(p => {
+        cont.innerHTML += `
+          <div class="producto-card">
+            <b>${p.nombre}</b> (${p.sku})<br>
+            <b>Marca:</b> ${p.marca} &nbsp; <b>Categoría:</b> ${p.categoria}<br>
+            <b>Precio:</b> $${p.precio} &nbsp; <b>Stock:</b> ${p.stock}
+            <div>
+              <label>Cantidad: </label>
+              <input type="number" min="0" max="${p.stock}" value="0" id="cantidad-${p.id_producto}" style="width:55px;">
+            </div>
+          </div>
+        `;
+      });
+    }
+    document.getElementById('formCompraProductos').addEventListener('submit', async function(e){
+        e.preventDefault();
+        const productosPedido = [];
+        let hayErrorStock = false;
+        let nombreProductoError = '';
+
+        productosActuales.forEach(p => {
+            const input = document.getElementById('cantidad-' + p.id_producto);
+            const solicitado = Number(input.value);
+
+            // Si el producto tiene stock 0 pero el usuario pide más de 0
+            if (p.stock === 0 && solicitado > 0) {
+            hayErrorStock = true;
+            nombreProductoError = p.nombre;
+            }
+            // Si usuario pide más que el stock real
+            else if (solicitado > p.stock) {
+            hayErrorStock = true;
+            nombreProductoError = p.nombre;
+            }
+            // Sólo agrega al pedido si el solicitado es mayor a cero y stock lo permite
+            if (solicitado > 0 && solicitado <= p.stock && p.stock > 0) {
+            productosPedido.push({
+                id_producto: p.id_producto,
+                cantidad: solicitado
+            });
+            }
+        });
+
+        if (hayErrorStock) {
+            alert("No puedes pedir productos sin stock o más del disponible. Producto: " + nombreProductoError);
+            return;
+        }
+
+        if (productosPedido.length === 0) {
+            alert("Selecciona al menos un producto y cantidad.");
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch('http://localhost:5000/api/pedidos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ productos: productosPedido })
+            });
+            if (res.ok) {
+            const pedido = await res.json();
+            alert("¡Pedido realizado exitosamente! ID: " + pedido.id_pedido);
+            cargarProductosUsuario();
+            cargarPedidosUsuario();
+            } else {
+            const err = await res.json();
+            alert(err.message || "No se pudo realizar el pedido.");
+            }
+        } catch {
+            alert("Error de conexión al realizar pedido.");
+        }
+    });
+
+    // -------- LISTAR Y OPERAR PEDIDOS DEL USUARIO --------
+    async function cargarPedidosUsuario() {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/pedidos', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const pedidos = await res.json();
+      const usuarioId = localStorage.getItem('idUsuario');
+      const adminFlag = localStorage.getItem('esAdmin') === 'true';
+      const cont = document.getElementById('listaPedidos');
+      cont.innerHTML = "";
+      if (!pedidos.length) {
+        cont.innerHTML = "<span>No tienes pedidos.</span>";
+        return;
+      }
+      pedidos.reverse().forEach(pedido => {
+        let productosHTML = "";
+        if (Array.isArray(pedido.productos)) {
+          productosHTML = "<span class='pedido-productos-list'><b>Productos:</b><ul style='margin-bottom: 5px;'>";
+          pedido.productos.forEach(pr => {
+            productosHTML += `<li>#${pr.id_producto} x${pr.cantidad}</li>`;
+          });
+          productosHTML += "</ul></span>";
+        }
+        cont.innerHTML += `
+          <div class="pedido-card" id="pedido-${pedido.id_pedido}">
+            <b>Número de pedido:</b> ${pedido.id_pedido}<br>
+            <b>Total:</b> $${pedido.total}<br>
+            <b>Estado:</b> ${pedido.estado}<br>
+            ${productosHTML}
+            <b>Fecha:</b> ${pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : ''}<br>
+            ${(pedido.estado === 'pendiente' && pedido.usuario === usuarioId)
+              ? `<button class="btn-cancelar-pedido" onclick="cancelarPedido('${pedido.id_pedido}')">Cancelar</button>`
+              : ""}
+            ${(pedido.estado === 'pendiente' && adminFlag)
+              ? `<button class="btn-completar-pedido" onclick="completarPedido('${pedido.id_pedido}')">Completar</button>`
+              : ""}
+          </div>
+        `;
+      });
+    }
+    async function cancelarPedido(id) {
+      if (!confirm('¿Seguro que deseas cancelar el pedido?')) return;
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('http://localhost:5000/api/pedidos/cancelar/' + id, {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+          alert("Pedido cancelado correctamente.");
+          cargarPedidosUsuario();
+        } else {
+          const err = await res.json();
+          alert(err.message || "No se pudo cancelar el pedido.");
+        }
+      } catch {
+        alert("Error de conexión al cancelar el pedido.");
+      }
+    }
+    async function completarPedido(id) {
+      if (!confirm('¿Seguro que deseas marcar el pedido como completado?')) return;
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('http://localhost:5000/api/pedidos/completar/' + id, {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+          alert("Pedido completado correctamente.");
+          cargarPedidosUsuario();
+        } else {
+          const err = await res.json();
+          alert(err.message || "No se pudo completar el pedido.");
+        }
+      } catch {
+        alert("Error de conexión al completar el pedido.");
+      }
+    }
+
+    // -------- RESEÑAS --------
+    async function cargarReseñas() {
+      const res = await fetch('http://localhost:5000/api/reviews');
+      const reviews = await res.json();
+      const cont = document.getElementById('listaReseñas');
+      cont.innerHTML = "";
+      if (!reviews.length) {
+        cont.innerHTML = "<span>Aún no hay reseñas.</span>";
+        return;
+      }
+      const usuarioId = localStorage.getItem('idUsuario');
+      const adminFlag = localStorage.getItem('esAdmin') === 'true';
+      reviews.reverse().forEach(r => {
+        cont.innerHTML += `
+          <div class="reseña-card" id="review-${r._id}">
+            <b>${r.usuario}</b> &nbsp; ${'⭐'.repeat(r.puntaje)}<br>
+            <span>${r.contenido}</span>
+            ${(usuarioId === r.id_usuario || adminFlag)
+              ? `<br><button class="btn-eliminar-resena" onclick="eliminarReseña('${r._id}')">Eliminar</button>`
+              : ""}
+          </div>
+        `;
+      });
+    }
+    document.getElementById('formReseña').addEventListener('submit', async function(e){
+      e.preventDefault();
+      document.getElementById('msgReseña').textContent = '';
+      const puntaje = document.getElementById('puntajeReseña').value;
+      const contenido = document.getElementById('contenidoReseña').value;
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('http://localhost:5000/api/reviews', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ puntaje, contenido })
+        });
+        if (res.ok) {
+          document.getElementById('formReseña').reset();
+          cargarReseñas();
+        } else {
+          const err = await res.json();
+          document.getElementById('msgReseña').textContent = err.message || "No se pudo enviar la reseña.";
+        }
+      } catch {
+        document.getElementById('msgReseña').textContent = "Error de conexión al servidor.";
+      }
+    });
+    async function eliminarReseña(id) {
+      if (!confirm('¿Seguro que deseas eliminar tu reseña?')) return;
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('http://localhost:5000/api/reviews/' + id, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) cargarReseñas();
+        else {
+          const err = await res.json();
+          alert(err.message || "No se pudo eliminar.");
+        }
+      } catch {
+        alert("Error de conexión al eliminar la reseña.");
+      }
+    }
+
+    function esAdmin() {
+      return localStorage.getItem('esAdmin') === 'true';
+    }
+
+    // -------- CARGA INICIAL --------
+    mostrarBienvenida();
+    cargarEstilistasSelect();
+    cargarProductosUsuario();
+    cargarCitasUsuario();
+    cargarPedidosUsuario();
+    cargarReseñas();
+  </script>
+</body>
+</html>

@@ -27,4 +27,4 @@ const estilistaSchema = mongoose.Schema(
     }
 )
 
-module.exports = mongoose.model('Estilista', estilistaSchema)
+module.exports = mongoose.model('Estilista', estilistaSchema)   

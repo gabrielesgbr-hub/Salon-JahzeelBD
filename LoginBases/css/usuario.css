@@ -1,0 +1,311 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+:root {
+  --color-rosa-principal: #d12567;
+  --color-card: #fff;
+  --color-card-shadow: 0 4px 24px 0 #db7fbb25;
+  --color-titulo: #d12567;
+  --color-txt: #28203c;
+  --color-txt-sec: #8d6381;
+  --color-input-bg: #fdf0f4;
+}
+
+* { box-sizing: border-box; font-family: "Montserrat", Arial, sans-serif; margin:0; padding:0; }
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(130deg,#f8e3ef 0%,#ddeaff 100%);
+}
+.user-headerbar {
+  width: 100vw;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  padding: 0 38px 0 24px;
+  background: #fff;
+  box-shadow: 0 4px 18px 0 #eeb3d237;
+}
+.headerbar-logo {
+  font-size: 1.3em; font-weight: 900; letter-spacing: 1px;
+  color: var(--color-titulo); display: flex; align-items: center; gap: 8px; margin-right: 28px;
+}
+.logout-btn {
+  color: #9a668c; font-size: 1.06em; background: none; border: none; cursor: pointer;
+  font-weight: 500; border-radius: 17px; padding: 8px 26px; margin-left: auto;
+  transition: background 0.17s, color 0.14s; display: flex; align-items: center; gap: 6px;
+  text-decoration: none;
+}
+.logout-btn:hover, .logout-btn:focus {
+  background: #ffe0e6; color: var(--color-rosa-principal);}
+.user-main {
+  width: 100%;
+  min-height: 100vh;
+  padding: 28px 0 28px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.main-title {
+  font-size: 2em;
+  color: var(--color-titulo);
+  font-weight: 800;
+  margin-bottom: 3px;
+  letter-spacing: 1.1px;
+  text-align: center;
+}
+.main-subtitle {
+  color: var(--color-txt-sec);
+  font-size: 16px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+.user-panel-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: center;
+  width: 100%;
+  max-width: 1500px;
+}
+.user-card-panel {
+  background: var(--color-card);
+  border-radius: 20px;
+  box-shadow: var(--color-card-shadow);
+  padding: 28px 23px 22px 23px;
+  margin-bottom: 0;
+  min-width: 300px;
+  max-width: 400px;
+  flex: 1 1 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.user-card-panel h3 {
+  color: var(--color-titulo);
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  margin-top: 0;
+}
+.container-input {
+  width: 100%;
+  height: 44px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 15px;
+  background: var(--color-input-bg);
+  border: 1.6px solid var(--color-rosa-principal);
+  border-radius: 12px;
+  box-shadow: 0 0.5px 6px #eeb3d20a;
+  transition: border 0.16s;
+}
+.container-input ion-icon { font-size: 1.19em; color: var(--color-titulo);}
+.container-input input,
+.container-input select,
+.container-input textarea {
+  border: none;
+  outline: none;
+  width: 100%;
+  background: transparent;
+  font-size: 16px;
+  color: #28203c;
+  border-radius: 10px;
+  padding-left: 7px;
+}
+.textarea-box {
+  height: auto !important;
+  align-items: flex-start;
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+.container-input textarea {
+  min-height: 45px;
+  resize: vertical;
+  font-size: 15px;
+}
+.button {
+  width: 100%;
+  height: 42px;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #fff;
+  background: var(--color-rosa-principal);
+  box-shadow: 0 1.5px 8px 0 #eeb3d250;
+  margin-top: 4px;
+}
+.button:hover, .button:focus { background: #ec7ba4; }
+
+.producto-card {
+  background: #ededed;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px #db7fbb15;
+  padding: 13px 14px;
+  margin: 0 0 10px 0;
+  color: #222;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.42;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.producto-card b { color: #111; font-weight: 700; }
+.producto-card .btn-comprar {
+  position: absolute;
+  top: 13px; right: 16px;
+  padding: 6px 18px;
+  background: var(--color-rosa-principal);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: 0 1.5px 8px 0 #eeb3d233;
+  transition: background 0.17s;
+}
+.producto-card .btn-comprar:hover { background: #ec7ba4; }
+
+.estilista-card {
+  background: #ededed;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px #db7fbb15;
+  padding: 13px 14px;
+  margin: 0 0 10px 0;
+  color: #222;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.42;
+  width: 100%;
+}
+.estilista-card b { color: #111; font-weight: 700; }
+
+.citas-panel {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: var(--color-card-shadow);
+  padding: 28px 22px 22px 22px;
+  max-width: 400px;
+  margin: 0 auto;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.citas-panel h3 {
+  color: var(--color-titulo);
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 11px;
+  margin-top: 0;
+}
+#listaCitas {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.cita-card {
+  background: #ededed;
+  border-radius: 7px;
+  box-shadow: 0 1px 6px #db7fbb11;
+  padding: 11px 14px;
+  color: #222;
+  font-size: 15px;
+  margin-bottom: 2px;
+  line-height: 1.47;
+}
+.cita-card b {color: #28203c;}
+
+.reseñas-panel {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px #ae499614;
+  padding: 28px 22px 16px 22px;
+  max-width: 400px;
+  margin: 0 auto;
+  flex-direction: column;
+  align-items: stretch;
+}
+.reseñas-panel h2 {
+  color: var(--color-rosa-principal);
+  font-size: 1.8em;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 2px;
+  letter-spacing: 1px;
+}
+.reseña-descripcion {
+  display: block;
+  color: #a357a7;
+  font-size: 15px;
+  text-align: center;
+  margin-bottom: 19px;
+}
+#listaReseñas { margin-top: 16px;}
+.reseña-card {
+  background: #fff7fa;
+  border-radius: 7px;
+  box-shadow: 0 1px 6px #db7fbb09;
+  padding: 11px 12px;
+  color: #222;
+  font-size: 15px;
+  margin-bottom: 9px;
+}
+
+.btn-eliminar-cita {
+  margin-top: 8px;
+  background: var(--color-rosa-principal);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.17s;
+  font-size: 16px;
+  box-shadow: 0 1.5px 8px 0 #eeb3d250;
+  display: inline-block;
+}
+.btn-eliminar-cita:hover { background: #ec7ba4; }
+
+.btn-eliminar-resena {
+  margin-top: 6px;
+  background: var(--color-rosa-principal);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 5px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 15px;
+  box-shadow: 0 1.5px 8px 0 #eeb3d250;
+}
+.btn-eliminar-resena:hover { background: #ec7ba4; }
+
+.cita-card,
+.producto-card,
+.pedido-card,
+.reseña-card {
+  background: #ededed;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px #db7fbb15;
+  padding: 13px 14px;
+  color: #222;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.42;
+  width: 100%;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+
+

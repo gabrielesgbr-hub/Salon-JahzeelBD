@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="stylesheet" href="css/registro.css">
+</head>
+<body>
+    <div class="container">
+        <div class="container-form">
+            <form class="sign-up" id="registroForm">
+                <h2> Registrarse </h2>
+
+                <span> Use su teléfono y contraseña para registrarse </span>
+                
+                <div class="container-input">
+                    <ion-icon name="person-outline"></ion-icon>
+                    <input type="text" id="nombre" placeholder="Nombre" required>
+                </div>
+
+                <div class="container-input">
+                    <ion-icon name="call-outline"></ion-icon>
+                    <input type="text" id="telefono" placeholder="Teléfono" required>
+                </div>
+
+                <div class="container-input">
+                    <ion-icon name="lock-closed-outline"></ion-icon>
+                    <input type="password" id="password" placeholder="Contraseña" required>
+                </div>
+
+                <div class="registro">
+                    ¿Ya tiene cuenta? <a href="login.html"> Iniciar sesión </a> 
+                </div>
+
+                <button class="button" type="submit"> REGISTRARSE </button>
+            </form>
+        </div>  
+    </div>
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script>
+    document.getElementById('registroForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombre').value;
+      const telefono = document.getElementById('telefono').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('http://localhost:5000/api/usuarios/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ nombre, telefono, password })
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        if(response.ok){
+          alert("¡Usuario creado correctamente! Ahora puede iniciar sesión.");
+          window.location.href = 'login.html';
+        }else{
+          alert(data.message || "Error al registrar usuario.");
+        }
+      } catch (err) {
+        alert("Error de conexión al servidor.");
+      }
+    });
+    </script>
+</body>
+</html>

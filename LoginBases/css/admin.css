@@ -1,0 +1,410 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+  --color-rosa-principal: #d12567;
+  --color-morado-acento: #a357a7;
+  --color-fondo: #f6f8fc;
+  --color-card: #fff;
+  --color-titulo: #d12567;
+  --color-txt: #28203c;
+  --color-txt-sec: #8d6381;
+  --color-primarybtn: #d12567;
+  --color-primarybtn-hover: #ec7ba4;
+  --color-btn-txt: #fff;
+  --border-radius-card: 24px;
+  --border-radius-small: 12px;
+  --borde-radio-contenedor: 10px;
+  --borde-radio-input: 9px;
+  --borde-radio-boton: 10px;
+  --sombra: 0 8px 30px 4px rgba(217,37,127,0.10), 0 1.5px 10px 1.5px #eeb3d254;
+  --sombra-card: 0 2px 16px 0 #eeb3d21a, 0 1px 9px #f8b3e410;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Montserrat", Arial, sans-serif;
+}
+body {
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(130deg,#f8e3ef 0%,#ddeaff 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.dashboard-headerbar {
+  width: 100vw;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  padding: 0 38px 0 24px;
+  background: #fff;
+  box-shadow: 0 4px 18px 0 #eeb3d237;
+  position: sticky;
+  top: 0; left: 0; z-index: 999;
+}
+.headerbar-logo {
+  font-size: 1.3em; font-weight: 900; letter-spacing: 1px;
+  color: var(--color-titulo); display: flex; align-items: center; gap: 8px; margin-right: 28px;
+}
+.logout-btn {
+  color: #9a668c; font-size: 1.08em; background: none; border: none; cursor: pointer;
+  font-weight: 500; border-radius: 17px; padding: 8px 26px; margin-left: auto;
+  transition: background 0.17s, color 0.14s; display: flex; align-items: center; gap: 6px;
+  text-decoration: none;
+}
+.logout-btn:hover, .logout-btn:focus {
+  background: #ffe0e6; color: var(--color-rosa-principal);
+}
+.dashboard-main {
+  margin-left: 0;
+  padding: 38px 0 38px 0;
+  width: 100%;
+  min-height: 100vh;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  align-items: center;
+}
+.dashboard-header {
+  font-size: 2em;
+  color: var(--color-titulo);
+  font-weight: 800;
+  margin-bottom: 3px;
+  letter-spacing: 1.2px;
+  margin-top: 20px;
+  text-align: center;
+}
+.dashboard-subtitle {
+  color: var(--color-txt-sec);
+  font-size: 16px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+.dashboard-card-panel {
+  background: var(--color-card);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--color-card-shadow);
+  padding: 25px 26px 21px 26px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+}
+.dashboard-panel-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: stretch;
+  width: 100%;
+  justify-content: center;
+}
+.dashboard-card-panel.dashboard-mini-panel {
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 2px 16px 0 #eeb3d21a, 0 1px 9px #f8b3e410;
+  padding: 22px 22px 18px 22px;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  height: 100%;
+  min-height: 0;
+}
+.dashboard-panel-row .dashboard-mini-panel:first-child {
+  width: 100%;
+  max-width: 370px;
+  min-width: 240px;
+  flex: 1 1 320px;
+}
+.dashboard-panel-row .dashboard-mini-panel.productos-registrados-panel, 
+.dashboard-panel-row .dashboard-mini-panel.estilistas-registrados-panel {
+  width: 100%;
+  max-width: 670px;
+  min-width: 320px;
+  flex: 2 2 500px;
+}
+
+/* Solo mueve el título de Crear Producto en el panel izquierdo */
+.crear-producto-titulo {
+  margin-bottom: 100px; /* Elige la separación que desees */
+}
+
+.dashboard-card-panel.dashboard-mini-panel h3 {
+  color: var(--color-titulo);
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 9px; /* Este solo afecta el resto de h3 */
+  margin-top: 0;
+}
+
+#listaProductos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.producto-card {
+  background: #ededed;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px #db7fbb15;
+  padding: 14px 18px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+.producto-data {
+  color: #222;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.45;
+  width: 100%;
+}
+.producto-card b {
+  color: #111;
+  font-weight: 700;
+}
+.producto-card .estado-activo {
+  color: #008000;
+  font-weight: 500;
+}
+.producto-card .estado-inactivo {
+  color: var(--color-rosa-principal);
+  font-weight: 500;
+}
+/* Estilistas */
+#listaEstilistas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.estilista-card {
+  background: #ededed;
+  border-radius: 8px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 6px #db7fbb15;
+}
+.estilista-data {
+  color: #222;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+.estilista-card b {
+  display: inline;
+  margin: 0;
+  color: #111;
+  font-weight: 700;
+}
+.estado-activo {
+  color: #008000;
+  font-weight: 500;
+}
+.boton-eliminar {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 7px;
+  font-size: 18px;
+  margin-left: 14px;
+  background: var(--color-primarybtn, #d12567);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 1.5px 8px 0 #eeb3d250;
+  transition: background 0.18s;
+}
+.boton-eliminar:hover, .boton-eliminar:focus {
+  background: var(--color-primarybtn-hover, #ec7ba4);
+}
+.container-input {
+  width: 100%;
+  height: 44px;
+  margin-bottom: 11px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 15px;
+  background: var(--color-input-bg, #fff8fcf1);
+  border: 1.7px solid var(--color-morado-acento);
+  border-radius: var(--borde-radio-input);
+  box-shadow: 0 1.5px 10px #eeb3d216;
+  position: relative;
+}
+.container-input ion-icon { font-size: 1.18em; color: var(--color-morado-acento);}
+.container-input input,
+.container-input label input[type="checkbox"] {
+  border: none;
+  outline: none;
+  width: 100%;
+  background: transparent;
+  font-size: 16px;
+  color: var(--color-txt);
+  border-radius: var(--borde-radio-input);
+  padding-left: 8px;
+}
+.container-input label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  font-size: 15px;
+  color: var(--color-titulo);
+  font-weight: 500;
+}
+.container-input.activo-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 15px;
+  height: 44px;
+  margin-bottom: 11px;
+  background: var(--color-input-bg, #fff8fcf1);
+  border: 1.7px solid var(--color-morado-acento);
+  border-radius: var(--borde-radio-input);
+  box-shadow: 0 1.5px 10px #eeb3d216;
+}
+.container-input.activo-checkbox ion-icon {
+  font-size: 1.18em;
+  color: var(--color-morado-acento);
+}
+.container-input.activo-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  width: auto;
+  font-size: 15px;
+  color: var(--color-titulo);
+  font-weight: 500;
+}
+.container-input.activo-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-rosa-principal);
+  margin-right: 0;
+}
+.container-input.activo-checkbox span {
+  font-weight: 500;
+  font-size: 16px;
+  margin-left: 0;
+  color: var(--color-titulo);
+  padding-left: 8px;
+}
+.button {
+  width: 160px;
+  height: 42px;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--borde-radio-boton);
+  cursor: pointer;
+  margin-top: 10px;
+  color: var(--color-btn-txt);
+  background: var(--color-primarybtn);
+  box-shadow: 0 1.5px 8px 0 #eeb3d250;
+  letter-spacing: 1.2px;
+}
+.button:hover, .button:focus { background: var(--color-primarybtn-hover); }
+
+.container-form h2 { font-size: 2em; color: var(--color-titulo); text-align: center; font-weight: 800; letter-spacing: 1.2px; margin-bottom: 3px;}
+.container-form span { display: block; color: var(--color-txt-sec); font-size: 16px; text-align: center; margin-bottom: 28px;}
+.container-form h3 { margin-bottom: 9px; margin-top: 0.5em; font-size: 18px; }
+#errorEstilista { color: var(--color-rosa-principal); font-size: 14px; text-align: center; margin-bottom: 7px; }
+
+::-webkit-scrollbar { width: 9px; background: #faeefd; border-radius: 8px;}
+::-webkit-scrollbar-thumb { background: #ead6e6; border-radius: 8px;}
+* { scrollbar-color: #ead6e6 #faeefd; scrollbar-width: thin; }
+
+/* Panel reseñas */
+.reseñas-registradas-panel {
+  background: #ededed;
+  border-radius: 20px;
+  box-shadow: var(--color-card-shadow, 0 3px 12px #db7fbb20);
+  padding: 28px 22px 22px 22px;
+  max-width: 600px;
+  margin: 30px auto 0 auto;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Tarjetas individuales de reseñas */
+.reseña-card {
+  background: #ededed;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px #db7fbb15;
+  padding: 13px 14px;
+  color: #222;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.42;
+  width: 100%;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Botón eliminar reseña */
+.btn-eliminar-resena {
+  margin-top: 8px;
+  background: var(--color-rosa-principal, #ec3d78);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.17s;
+  font-size: 16px;
+  box-shadow: 0 1.5px 8px 0 #eeb3d250;
+  display: inline-block;
+}
+.btn-eliminar-resena:hover { background: #ec7ba4; }
+
+.btn-estado-estilista {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.92em;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  transition: background 0.15s;
+}
+
+.btn-estado-estilista:hover {
+  background: #dde;
+  color: #555;
+}
+
+.btn-estado-producto {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.92em;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  transition: background 0.15s;
+}
+.btn-estado-producto:hover {
+  background: #dde;
+  color: #555;
+}
