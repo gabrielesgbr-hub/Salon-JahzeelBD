@@ -4,8 +4,8 @@ const {getEstilistas, createEstilista, updateEstilista, deleteEstilista} = requi
 const {protect} = require('../middleware/authMiddleware')
 
 router.get('/', protect, getEstilistas)
-router.post('/', protect, createEstilista)
-router.post('/:id', protect, updateEstilista)
-router.put('/:id', protect, deleteEstilista)
+router.post('/', protect, createEstilista)  
+router.put('/:id', protect, updateEstilista)
+router.delete('/:id', protect, deleteEstilista)
 
 module.exports = router

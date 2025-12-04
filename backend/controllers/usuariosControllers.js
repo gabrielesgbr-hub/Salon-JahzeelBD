@@ -25,6 +25,7 @@ const login = asyncHandler(async(req,res) => {
             _id: usuario.id,
             nombre: usuario.nombre,
             telefono: usuario.telefono,
+            esAdmin: usuario.esAdmin, //PRUEBA
             token: generarToken(usuario.id)
         })
     } else{
@@ -45,7 +46,7 @@ const register = asyncHandler(async(req,res) => {
     const usuarioExists = await Usuario.findOne({telefono})
     if (usuarioExists){
         res.status(400)
-        throw new Error('Ese usuario ya existe')
+        throw new Error('Ese número ya está registrado')
     } else{
         //hash al password
         const salt = await bcrypt.genSalt(10)

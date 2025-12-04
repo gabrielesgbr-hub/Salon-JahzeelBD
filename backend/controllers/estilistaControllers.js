@@ -8,7 +8,7 @@ const createEstilista = asyncHandler(async (req, res) => {
         throw new Error('Acceso no autorizado')
     }
 
-    const { nombre, telefono } = req.body
+    const { nombre, telefono, activo} = req.body
 
     if (!nombre || !telefono) {
         res.status(400)
@@ -31,7 +31,7 @@ const createEstilista = asyncHandler(async (req, res) => {
         throw new Error('Ya existe un estilista con es número de telefono')
     }
 
-    const estilista = await Estilista.create({ nombre, telefono })
+    const estilista = await Estilista.create({ nombre, telefono, activo: activo === true || activo === 'true' })
     res.status(201).json(estilista)
 })
 

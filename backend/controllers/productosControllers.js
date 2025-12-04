@@ -29,7 +29,7 @@ const getProducto = asyncHandler(async(req, res)=>{
         res.status(403)
         throw new Error('Producto no disponible')
     }
-
+    
     res.status(200).json(producto)
 })
 

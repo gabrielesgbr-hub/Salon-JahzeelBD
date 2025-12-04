@@ -9,7 +9,7 @@ const getReviews = asyncHandler(async(req, res)=>{
 const createReview = asyncHandler(async(req, res)=>{
     if(req.usuario.esAdmin){
         res.status(401)
-        throw new Error('Solo un administrador puede crear una reseña') 
+        throw new Error('Solo un cliente puede crear una reseña') 
     }
     
     if(!req.body.puntaje || !req.body.contenido){
