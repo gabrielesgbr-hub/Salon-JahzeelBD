@@ -5,6 +5,8 @@ const connectMongo = require('./config/db_mongo')
 const {connectPostgres} = require('./config/db_postgres')
 const cors = require('cors')
 const {errorHandler} = require('./middleware/errorMiddleware')
+const path = require('path')
+const opn = require('opn')
 
 const port = process.env.PORT || 5000
 
@@ -27,4 +29,13 @@ app.use('/api/estilista', require('./routes/estilistaRoutes'))
 
 app.use(errorHandler)
 
-app.listen(port, ()=>console.log(`Servidor Iniciado en el puerto: ${port}`))
+app.listen(port, ()=>{
+    console.log(`Servidor Iniciado en el puerto: ${port}`)
+    opn(`http://localhost:${port}`)
+})
+
+app.use(express.static(path.join(__dirname, "..","LoginBases")))
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname,"..", "LoginBases", "login.html"));
+})

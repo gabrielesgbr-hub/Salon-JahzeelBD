@@ -356,7 +356,7 @@
             <b>Estado:</b> ${pedido.estado}<br>
             ${productosHTML}
             <b>Fecha:</b> ${pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : ''}<br>
-            ${(pedido.estado === 'pendiente' && pedido.usuario === usuarioId)
+            ${(pedido.estado === 'pendiente' && pedido.usuario.trim() === usuarioId)
               ? `<button class="btn-cancelar-pedido" onclick="cancelarPedido('${pedido.id_pedido}')">Cancelar</button>`
               : ""}
             ${(pedido.estado === 'pendiente' && adminFlag)
@@ -488,6 +488,7 @@
     cargarCitasUsuario();
     cargarPedidosUsuario();
     cargarReseñas();
+    //cancelarPedido();
   </script>
 </body>
 </html>

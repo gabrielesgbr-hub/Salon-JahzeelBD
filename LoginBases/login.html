@@ -56,6 +56,8 @@
                 if (response.ok && data.token) {
                     // Guarda el token JWT
                     localStorage.setItem('token', data.token);
+                    localStorage.setItem('idUsuario', data._id);
+                    localStorage.setItem('esAdmin', data.esAdmin);
                     // Redirige según el campo esAdmin
                     if (data.esAdmin == true) {
                         window.location.href = 'admin.html';
