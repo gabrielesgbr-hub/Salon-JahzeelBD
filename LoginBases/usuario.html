@@ -10,6 +10,7 @@
   <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </head>
 <body>
+  <!-- HEADER -->
   <header class="user-headerbar">
     <div class="headerbar-logo">
       <ion-icon name="cut-outline"></ion-icon>
@@ -19,11 +20,15 @@
       <ion-icon name="log-out-outline"></ion-icon> Cerrar sesión
     </a>
   </header>
+  
+  <!-- MAIN -->
   <main class="user-main">
     <div class="main-title" id="bienvenida-usuario">Bienvenid@</div>
-    <div class="main-subtitle">Agenda una cita, compra productos, consulta tus citas, tus pedidos y deja tu opinión</div>
+    <div class="main-subtitle">
+      Agenda una cita, compra productos, consulta tus citas, tus pedidos y deja tu opinión
+    </div>
     <div class="user-panel-grid">
-      <!-- Agenda cita -->
+      <!-- AGENDA CITA -->
       <div class="user-card-panel agendar-panel">
         <h3>Agenda tu cita</h3>
         <form id="formAgendarCita">
@@ -58,12 +63,14 @@
         </form>
         <div id="msgCita"></div>
       </div>
-      <!-- Consulta citas agendadas -->
+
+      <!-- CONSULTA CITAS AGENDADAS -->
       <div class="user-card-panel citas-panel">
         <h3>Mis citas agendadas</h3>
         <div id="listaCitas"></div>
       </div>
-      <!-- Compra productos -->
+
+      <!-- COMPRA PRODUCTOS -->
       <div class="user-card-panel productos-panel">
         <h3>Compra productos</h3>
         <form id="formCompraProductos">
@@ -72,12 +79,14 @@
           <div id="msgPedido"></div>
         </form>
       </div>
-      <!-- Pedidos usuario -->
+
+      <!-- PEDIDOS USUARIO -->
       <div class="user-card-panel pedidos-panel">
         <h3>Mis pedidos</h3>
         <div id="listaPedidos"></div>
       </div>
-      <!-- Reseñas -->
+
+      <!-- RESEÑAS -->
       <div class="user-card-panel reseñas-panel">
         <form id="formReseña">
           <h2>Reseñas</h2>
@@ -104,6 +113,7 @@
       </div>
     </div>
   </main>
+
   <script>
     // -------- LOGIN Y SESIÓN --------
     async function mostrarBienvenida() {
@@ -126,7 +136,7 @@
         nombre ? `Bienvenid@, ${nombre}` : "Bienvenid@";
     }
 
-    document.getElementById('cerrarSesionBtn').addEventListener('click', function(e) {
+    document.getElementById('cerrarSesionBtn').addEventListener('click', function() {
       localStorage.removeItem('nombreUsuario');
       localStorage.removeItem('token');
       localStorage.removeItem('idUsuario');
@@ -149,6 +159,7 @@
         select.innerHTML = `<option value="" disabled>No hay estilistas disponibles</option>`;
       }
     }
+
     async function cargarCitasUsuario() {
       const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:5000/api/citas', {
@@ -177,6 +188,7 @@
         `;
       });
     }
+
     async function eliminarCita(idCita) {
       if (!confirm('¿Seguro que quieres eliminar esta cita?')) return;
       const token = localStorage.getItem('token');
@@ -196,6 +208,7 @@
         alert('Error de conexión al eliminar la cita.');
       }
     }
+
     document.getElementById('formAgendarCita').addEventListener('submit', async function(e){
       e.preventDefault();
       const id_estilista = document.getElementById('selectEstilista').value;
@@ -227,7 +240,6 @@
 
     // -------- PRODUCTOS Y PEDIDOS --------
     let productosActuales = [];
-
     async function cargarProductosUsuario() {
       const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:5000/api/productos', {
@@ -254,67 +266,63 @@
         `;
       });
     }
+
     document.getElementById('formCompraProductos').addEventListener('submit', async function(e){
-        e.preventDefault();
-        const productosPedido = [];
-        let hayErrorStock = false;
-        let nombreProductoError = '';
+      e.preventDefault();
+      const productosPedido = [];
+      let hayErrorStock = false;
+      let nombreProductoError = '';
 
-        productosActuales.forEach(p => {
-            const input = document.getElementById('cantidad-' + p.id_producto);
-            const solicitado = Number(input.value);
+      productosActuales.forEach(p => {
+        const input = document.getElementById('cantidad-' + p.id_producto);
+        const solicitado = Number(input.value);
 
-            // Si el producto tiene stock 0 pero el usuario pide más de 0
-            if (p.stock === 0 && solicitado > 0) {
-            hayErrorStock = true;
-            nombreProductoError = p.nombre;
-            }
-            // Si usuario pide más que el stock real
-            else if (solicitado > p.stock) {
-            hayErrorStock = true;
-            nombreProductoError = p.nombre;
-            }
-            // Sólo agrega al pedido si el solicitado es mayor a cero y stock lo permite
-            if (solicitado > 0 && solicitado <= p.stock && p.stock > 0) {
-            productosPedido.push({
-                id_producto: p.id_producto,
-                cantidad: solicitado
-            });
-            }
+        if (p.stock === 0 && solicitado > 0) {
+          hayErrorStock = true;
+          nombreProductoError = p.nombre;
+        }
+        else if (solicitado > p.stock) {
+          hayErrorStock = true;
+          nombreProductoError = p.nombre;
+        }
+        if (solicitado > 0 && solicitado <= p.stock && p.stock > 0) {
+          productosPedido.push({
+            id_producto: p.id_producto,
+            cantidad: solicitado
+          });
+        }
+      });
+
+      if (hayErrorStock) {
+        alert("No puedes pedir productos sin stock o más del disponible. Producto: " + nombreProductoError);
+        return;
+      }
+      if (productosPedido.length === 0) {
+        alert("Selecciona al menos un producto y cantidad.");
+        return;
+      }
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('http://localhost:5000/api/pedidos', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ productos: productosPedido })
         });
-
-        if (hayErrorStock) {
-            alert("No puedes pedir productos sin stock o más del disponible. Producto: " + nombreProductoError);
-            return;
+        if (res.ok) {
+          const pedido = await res.json();
+          alert("¡Pedido realizado exitosamente! ID: " + pedido.id_pedido);
+          cargarProductosUsuario();
+          cargarPedidosUsuario();
+        } else {
+          const err = await res.json();
+          alert(err.message || "No se pudo realizar el pedido.");
         }
-
-        if (productosPedido.length === 0) {
-            alert("Selecciona al menos un producto y cantidad.");
-            return;
-        }
-
-        const token = localStorage.getItem('token');
-        try {
-            const res = await fetch('http://localhost:5000/api/pedidos', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({ productos: productosPedido })
-            });
-            if (res.ok) {
-            const pedido = await res.json();
-            alert("¡Pedido realizado exitosamente! ID: " + pedido.id_pedido);
-            cargarProductosUsuario();
-            cargarPedidosUsuario();
-            } else {
-            const err = await res.json();
-            alert(err.message || "No se pudo realizar el pedido.");
-            }
-        } catch {
-            alert("Error de conexión al realizar pedido.");
-        }
+      } catch {
+        alert("Error de conexión al realizar pedido.");
+      }
     });
 
     // -------- LISTAR Y OPERAR PEDIDOS DEL USUARIO --------
@@ -358,6 +366,7 @@
         `;
       });
     }
+
     async function cancelarPedido(id) {
       if (!confirm('¿Seguro que deseas cancelar el pedido?')) return;
       const token = localStorage.getItem('token');
@@ -377,6 +386,7 @@
         alert("Error de conexión al cancelar el pedido.");
       }
     }
+
     async function completarPedido(id) {
       if (!confirm('¿Seguro que deseas marcar el pedido como completado?')) return;
       const token = localStorage.getItem('token');
@@ -421,6 +431,7 @@
         `;
       });
     }
+
     document.getElementById('formReseña').addEventListener('submit', async function(e){
       e.preventDefault();
       document.getElementById('msgReseña').textContent = '';
@@ -447,6 +458,7 @@
         document.getElementById('msgReseña').textContent = "Error de conexión al servidor.";
       }
     });
+
     async function eliminarReseña(id) {
       if (!confirm('¿Seguro que deseas eliminar tu reseña?')) return;
       const token = localStorage.getItem('token');

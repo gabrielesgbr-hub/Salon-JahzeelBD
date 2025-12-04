@@ -17,17 +17,18 @@
       <ion-icon name="log-out-outline"></ion-icon> Cerrar sesión
     </a>
   </header>
+
   <!-- MAIN DASHBOARD -->
   <main class="dashboard-main">
     <div>
       <div class="dashboard-header">PÁGINA DEL ADMIN</div>
-      <div class="dashboard-subtitle">Aqui podrás gestionar tanto los productos, así como a los estilistas y las reseñas</div>
+      <div class="dashboard-subtitle">Aquí podrás gestionar tanto los productos, así como a los estilistas y las reseñas</div>
     </div>
 
     <!-- PANEL PRODUCTOS -->
     <div id="productos" class="dashboard-card-panel" style="background:transparent;box-shadow:none;padding-bottom:0;">
       <div class="dashboard-panel-row">
-        <!-- CUADRO IZQUIERDA: CREAR PRODUCTO -->
+        <!-- IZQUIERDA: CREAR PRODUCTO -->
         <div class="dashboard-card-panel dashboard-mini-panel">
           <form class="sign-up" id="formCrearProducto">
             <h3 class="crear-producto-titulo">Crear Producto</h3>
@@ -65,17 +66,18 @@
             <button class="button" type="submit">Crear producto</button>
           </form>
         </div>
-        <!-- CUADRO DERECHA: PRODUCTOS REGISTRADOS -->
+        <!-- DERECHA: PRODUCTOS REGISTRADOS -->
         <div class="dashboard-card-panel dashboard-mini-panel productos-registrados-panel">
           <h3>Productos registrados</h3>
           <div id="listaProductos"></div>
         </div>
       </div>
     </div>
+
     <!-- PANEL ESTILISTAS -->
     <div id="estilistas" class="dashboard-card-panel" style="background:transparent;box-shadow:none;padding-bottom:0;">
       <div class="dashboard-panel-row">
-        <!-- CUADRO IZQUIERDA: CREAR ESTILISTA -->
+        <!-- IZQUIERDA: CREAR ESTILISTA -->
         <div class="dashboard-card-panel dashboard-mini-panel">
           <form class="sign-up" id="formCrearEstilista">
             <h3>Crear Estilista</h3>
@@ -98,13 +100,14 @@
             <button class="button" type="submit">Crear estilista</button>
           </form>
         </div>
-        <!-- CUADRO DERECHA: ESTILISTAS REGISTRADOS -->
+        <!-- DERECHA: ESTILISTAS REGISTRADOS -->
         <div class="dashboard-card-panel dashboard-mini-panel estilistas-registrados-panel">
           <h3>Estilistas registrados</h3>
           <div id="listaEstilistas"></div>
         </div>
       </div>
     </div>
+    
     <!-- PANEL RESEÑAS -->
     <div class="dashboard-card-panel" style="background:transparent;box-shadow:none;">
       <div class="dashboard-panel-row">
@@ -116,11 +119,14 @@
     </div>
   </main>
 
+  <!-- SCRIPTS IONICONS -->
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
   <script>
-    // --- NUEVO BLOQUE: Verifica y guarda esAdmin ---
+    // ----------- FUNCIONES ADMIN -----------
+
+    // Verifica si el usuario es admin y guarda en localStorage
     async function verificaAdmin() {
       const token = localStorage.getItem('token');
       if (token) {
@@ -140,7 +146,8 @@
     function esAdmin() {
       return localStorage.getItem('esAdmin') === 'true';
     }
-    // --- Botón cerrar sesión ---
+
+    // Botón cerrar sesión
     document.getElementById('cerrarSesionBtn').addEventListener('click', function(e) {
       localStorage.removeItem('nombreUsuario');
       localStorage.removeItem('token');
@@ -148,7 +155,8 @@
       localStorage.removeItem('esAdmin');
     });
 
-    // --- Productos ---
+    // ----------- PRODUCTOS -----------
+
     async function cargarProductosAdmin() {
       const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:5000/api/productos/admin', {
@@ -190,7 +198,6 @@
     }
 
     async function eliminarProducto(id) {
-      console.log('ID recibido en eliminarProducto:', id); // debug
       if (!confirm('¿Seguro que deseas eliminar el producto?')) return;
       const token = localStorage.getItem('token');
       try {
@@ -199,7 +206,6 @@
           headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await res.json();
-        console.log('Delete response:', data); // debug
         if (res.ok) {
           alert("Producto eliminado correctamente");
           await cargarProductosAdmin();
@@ -234,7 +240,42 @@
       }
     }
 
-    // --- Estilistas (igual que antes) ---
+    document.getElementById('formCrearProducto').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const nombre = document.getElementById('nombre').value;
+      const sku = document.getElementById('sku').value;
+      const marca = document.getElementById('marca').value;
+      const categoria = document.getElementById('categoria').value;
+      const stock = parseInt(document.getElementById('stock').value, 10);
+      const precio = parseFloat(document.getElementById('precio').value);
+      const estaactivo = document.getElementById('estaactivo').checked;
+      const token = localStorage.getItem('token');
+
+      try {
+        const response = await fetch('http://localhost:5000/api/productos', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ nombre, sku, marca, categoria, precio, stock, estaactivo })
+        });
+        const data = await response.json();
+        if(response.ok){
+          alert("¡Producto creado correctamente!");
+          e.target.reset();
+          cargarProductosAdmin();
+        }else{
+          alert(data.message || "No se pudo crear el producto.");
+        }
+      } catch (err) {
+        alert("Error de conexión al servidor.");
+      }
+    });
+
+
+    // ----------- ESTILISTAS -----------
+
     async function cargarEstilistasAdmin() {
       const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:5000/api/estilista', {
@@ -247,28 +288,28 @@
         cont.innerHTML = "<span>No hay estilistas registrados.</span>";
         return;
       }
-        estilistas.forEach(e => {
+      estilistas.forEach(e => {
         const activo = e.activo ? 'Activo' : 'Inactivo';
         cont.innerHTML += `
-            <div style='background:#eee;padding:10px 12px;border-radius:5px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;'>
+          <div style='background:#eee;padding:10px 12px;border-radius:5px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;'>
             <div>
-                <b>${e.nombre}</b> <br>
-                <b>Teléfono:</b> ${e.telefono} <br>
-                <b>Estado:</b>
-                <span style='color:${e.activo ? "#008000" : "#d12567"};'>${activo}</span>
-                <button class="btn-estado-estilista"
-                    onclick="cambiarEstadoEstilista('${e._id}', ${e.activo ? 'false' : 'true'})"
-                    title="${e.activo ? 'Inactivar' : 'Activar'}">
-                    ${e.activo ? 'Cambiar a estado desactivado' : 'Cambiar a estado activo'}
-                </button>
+              <b>${e.nombre}</b> <br>
+              <b>Teléfono:</b> ${e.telefono} <br>
+              <b>Estado:</b>
+              <span style='color:${e.activo ? "#008000" : "#d12567"};'>${activo}</span>
+              <button class="btn-estado-estilista"
+                onclick="cambiarEstadoEstilista('${e._id}', ${e.activo ? 'false' : 'true'})"
+                title="${e.activo ? 'Inactivar' : 'Activar'}">
+                ${e.activo ? 'Cambiar a estado desactivado' : 'Cambiar a estado activo'}
+              </button>
             </div>
             <button class="button" style="width:32px;height:32px;background:#d12567;padding:0;border-radius:3px;font-size:18px;"
-                title="Eliminar" onclick="eliminarEstilista('${e._id}')">
-                <ion-icon name="trash-outline"></ion-icon>
+              title="Eliminar" onclick="eliminarEstilista('${e._id}')">
+              <ion-icon name="trash-outline"></ion-icon>
             </button>
-            </div>
+          </div>
         `;
-        });
+      });
     }
 
     async function eliminarEstilista(id) {
@@ -314,86 +355,6 @@
       }
     }
 
-    // --- Reseñas ---
-    async function cargarReseñasAdmin() {
-      const res = await fetch('http://localhost:5000/api/reviews', {
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-      });
-      const reviews = await res.json();
-      const cont = document.getElementById('adminListaReseñas');
-      cont.innerHTML = "";
-      if (!reviews.length) {
-        cont.innerHTML = "<span>No hay reseñas en el sistema.</span>";
-        return;
-      }
-      reviews.reverse().forEach(r => {
-        cont.innerHTML += `
-          <div class="reseña-card" id="review-admin-${r._id}">
-            <b>Usuario:</b> ${r.usuario}<br>
-            <b>Puntaje:</b> ${'⭐'.repeat(r.puntaje)}<br>
-            <b>Fecha:</b> ${r.createdAt ? (new Date(r.createdAt)).toLocaleDateString() : ''}<br>
-            <span>${r.contenido}</span>
-            ${esAdmin()
-                ? `<br><button class="btn-eliminar-resena" onclick="eliminarReseñaAdmin('${r._id}')">Eliminar</button>`
-                : ""}
-          </div>
-        `;
-      });
-    }
-    async function eliminarReseñaAdmin(id) {
-      if (!confirm('¿Seguro que deseas eliminar esta reseña?')) return;
-      const token = localStorage.getItem('token');
-      try {
-        const res = await fetch('http://localhost:5000/api/reviews/' + id, {
-          method: 'DELETE',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        if (res.ok) {
-          cargarReseñasAdmin();
-        } else {
-          const err = await res.json();
-          alert(err.message || "No se pudo eliminar la reseña.");
-        }
-      } catch {
-        alert("Error de conexión al eliminar la reseña.");
-      }
-    }
-
-    // --- Crear producto ---
-    document.getElementById('formCrearProducto').addEventListener('submit', async function(e){
-      e.preventDefault();
-      const nombre = document.getElementById('nombre').value;
-      const sku = document.getElementById('sku').value;
-      const marca = document.getElementById('marca').value;
-      const categoria = document.getElementById('categoria').value;
-      const stock = parseInt(document.getElementById('stock').value, 10);
-      const precio = parseFloat(document.getElementById('precio').value);
-      const estaactivo = document.getElementById('estaactivo').checked;
-      const token = localStorage.getItem('token');
-
-      try {
-        const response = await fetch('http://localhost:5000/api/productos', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({ nombre, sku, marca, categoria, precio, stock, estaactivo })
-        });
-        const data = await response.json();
-        if(response.ok){
-          alert("¡Producto creado correctamente!");
-          e.target.reset();
-          cargarProductosAdmin();
-        }else{
-          alert(data.message || "No se pudo crear el producto.");
-        }
-      } catch (err) {
-        alert("Error de conexión al servidor.");
-      }
-    });
-
-    // --- Crear estilista ---
     document.getElementById('formCrearEstilista').addEventListener('submit', async function(e){
       e.preventDefault();
       document.getElementById('errorEstilista').textContent = "";
@@ -425,7 +386,52 @@
       }
     });
 
-    // --- CARGA INICIAL ---
+    // ----------- RESEÑAS -----------
+
+    async function cargarReseñasAdmin() {
+      const res = await fetch('http://localhost:5000/api/reviews', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      });
+      const reviews = await res.json();
+      const cont = document.getElementById('adminListaReseñas');
+      cont.innerHTML = "";
+      if (!reviews.length) {
+        cont.innerHTML = "<span>No hay reseñas en el sistema.</span>";
+        return;
+      }
+      reviews.reverse().forEach(r => {
+        cont.innerHTML += `
+          <div class="reseña-card" id="review-admin-${r._id}">
+            <b>Usuario:</b> ${r.usuario}<br>
+            <b>Puntaje:</b> ${'⭐'.repeat(r.puntaje)}<br>
+            <b>Fecha:</b> ${r.createdAt ? (new Date(r.createdAt)).toLocaleDateString() : ''}<br>
+            <span>${r.contenido}</span>
+            ${esAdmin() ? `<br><button class="btn-eliminar-resena" onclick="eliminarReseñaAdmin('${r._id}')">Eliminar</button>` : ""}
+          </div>
+        `;
+      });
+    }
+
+    async function eliminarReseñaAdmin(id) {
+      if (!confirm('¿Seguro que deseas eliminar esta reseña?')) return;
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('http://localhost:5000/api/reviews/' + id, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+          cargarReseñasAdmin();
+        } else {
+          const err = await res.json();
+          alert(err.message || "No se pudo eliminar la reseña.");
+        }
+      } catch {
+        alert("Error de conexión al eliminar la reseña.");
+      }
+    }
+
+    // ----------- CARGA INICIAL -----------
     (async function(){
       await verificaAdmin();
       cargarProductosAdmin();
